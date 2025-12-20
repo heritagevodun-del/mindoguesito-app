@@ -1,30 +1,27 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 
-// On garde le moteur stable
-export const maxDuration = 30;
+// Durée maximale pour laisser le temps au Sage de répondre
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
     const result = streamText({
-      model: google('gemini-1.5-flash'), // Utilisation du modèle Flash (plus rapide)
-      
+      model: google('gemini-1.5-flash'), 
+      // On simplifie les instructions pour ne pas surcharger le processeur
       system: `Tu es Mindoguesito, le Sage bienveillant de Ouidah. 
-      IMPORTANT : Sois concis au début. Si on te dit juste "Bonjour", réponds par une salutation chaleureuse et brève en proposant ton aide. 
-      Ne donne de longues explications QUE si l'utilisateur pose une question précise.
-      
-      MISSION : Déconstruire les préjugés sur le Vodun (religion de paix) et présenter Ouidah comme une Terre Sainte (la Mecque/Rome du Vodun). 
-      Ton ton est calme et spirituel.`,
-      
+      Réponds toujours de manière chaleureuse. 
+      Si on te dit "Bonjour", réponds brièvement en saluant et en proposant ton aide sur le Vodun ou Ouidah.
+      Pour les questions complexes, sois détaillé et pédagogique.`,
       messages,
     });
 
     return result.toDataStreamResponse();
 
   } catch (error: unknown) {
-    const err = error instanceof Error ? error.message : String(error);
-    return new Response(JSON.stringify({ error: err }), { status: 500 });
+    console.error("Erreur détectée :", error);
+    return new Response(JSON.stringify({ error: "Le Sage est en méditation, réessayez." }), { status: 500 });
   }
 }
