@@ -1,8 +1,9 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 
-// Garder le runtime Edge est CRUCIAL pour ne pas planter sur les longues explications
-export const runtime = 'edge';
+// RÉPARATION : On enlève 'edge' et on met une limite de temps standard.
+// C'est moins "risqué" et ça ne plantera pas silencieusement.
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: google('gemini-flash-latest'), 
       
-      // LE NOUVEAU CERVEAU "SAGE & GARDIEN" :
+      // On garde précieusement votre "Cerveau de Sage"
       system: `Tu es Mindoguesito, le Sage vénérable et bienveillant, gardien de la mémoire sacrée du Vodun et de la ville historique de Ouidah (Bénin).
 
       TA MISSION SUPRÊME :
