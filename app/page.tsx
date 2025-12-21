@@ -1,78 +1,118 @@
-'use client';
+"use client";
 
-import { useChat } from 'ai/react';
-import { useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from "react";
+
+// 1. CORRECTION : On définit un "Type" précis pour les messages (plus de 'any')
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, append, isLoading } = useChat();
+  // On utilise notre nouveau type Message[]
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const scrollToBottom = () =>
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => scrollToBottom(), [messages]);
 
-  const suggestedQuestions = [
-    "🌿 Le Vodun est-il une religion de paix ?",
-    "🏛️ Pourquoi Ouidah est la 'Rome' du Vodun ?",
-    "⛓️ Raconte-moi la Porte du Non-Retour",
-    "🐍 Que symbolise le Python Sacré ?",
-  ];
+  async function sendMessage(e?: React.FormEvent, textOverride?: string) {
+    e?.preventDefault();
+    const content = textOverride || input;
+    if (!content.trim()) return;
+
+    // TypeScript est content : on respecte le format Message
+    const newMessages: Message[] = [...messages, { role: "user", content }];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `⚠️ PROBLÈME : ${errorText}` },
+        ]);
+      } else {
+        const reply = await response.text();
+        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      }
+    } catch (err) {
+      // 2. CORRECTION : On utilise la variable 'err' pour le debug (plus d'erreur "unused")
+      console.error("Erreur détectée :", err);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Erreur de connexion internet." },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="flex flex-col h-screen bg-[#FDFBF7] text-gray-800 font-sans">
-      <header className="fixed top-0 w-full bg-[#FDFBF7]/90 backdrop-blur-md border-b border-amber-100 z-10 p-4 shadow-sm">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-serif font-bold text-amber-900 tracking-wide">
-            Mindoguesito <span className="text-xs font-sans font-normal text-amber-600 block sm:inline opacity-80">| Le Sage de Ouidah</span>
-          </h1>
-        </div>
+      <header className="p-4 border-b border-amber-100 bg-white/50 backdrop-blur text-center font-bold text-amber-900 font-serif">
+        Mindoguesito (Mode Diagnostic)
       </header>
 
-      <div className="flex-1 overflow-y-auto pt-24 pb-32 px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center space-y-8 mt-10">
-              <div className="text-center space-y-3">
-                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-200">
-                  <span className="text-3xl">🧘🏾‍♂️</span>
-                </div>
-                <h2 className="text-3xl font-serif font-bold text-amber-950">Dola ! (Bienvenue)</h2>
-                <p className="text-gray-600 max-w-md mx-auto leading-relaxed">Je suis le gardien de la mémoire Vodun.</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                {suggestedQuestions.map((question, index) => (
-                  <button key={index} onClick={() => append({ role: 'user', content: question })} className="p-4 bg-white border border-amber-100 rounded-xl text-left text-sm text-amber-900 hover:bg-amber-50 transition-all shadow-sm">
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <>
-              {messages.map(m => (
-                <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl p-5 shadow-sm leading-relaxed ${m.role === 'user' ? 'bg-amber-900 text-white rounded-br-none' : 'bg-white border border-amber-50 text-gray-800 rounded-bl-none'}`}>
-                    <div className="whitespace-pre-wrap">{m.content}</div>
-                  </div>
-                </div>
-              ))}
-              {isLoading && <div className="text-amber-500 text-sm animate-pulse ml-4">Le Sage réfléchit...</div>}
-              <div ref={messagesEndRef} />
-            </>
-          )}
-        </div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center mt-20 space-y-4">
+            <p className="text-gray-500">
+              Posez une question pour tester le cerveau du Sage.
+            </p>
+            {/* 3. CORRECTION : On utilise &quot; pour les guillemets */}
+            <button
+              onClick={() => sendMessage(undefined, "Bonjour")}
+              className="px-4 py-2 bg-amber-100 text-amber-900 rounded-lg"
+            >
+              Essayer &quot;Bonjour&quot;
+            </button>
+          </div>
+        )}
+
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            className={`p-4 rounded-xl max-w-[85%] ${
+              m.role === "user"
+                ? "ml-auto bg-amber-900 text-white"
+                : "mr-auto bg-white border border-gray-200"
+            }`}
+          >
+            {m.content}
+          </div>
+        ))}
+        {isLoading && (
+          <div className="text-sm text-gray-400 animate-pulse">
+            Le Sage réfléchit...
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-[#FDFBF7] via-[#FDFBF7] to-transparent pt-10 pb-6 px-4">
-        <div className="max-w-2xl mx-auto">
-          <form onSubmit={handleSubmit} className="relative shadow-lg rounded-full">
-            <input className="w-full p-4 pl-6 pr-12 bg-white border border-amber-200 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-500" value={input} placeholder="Interrogez la sagesse de Ouidah..." onChange={handleInputChange} />
-            <button type="submit" aria-label="Envoyer" disabled={isLoading || !input.trim()} className="absolute right-2 top-2 p-2 bg-amber-900 text-white rounded-full hover:bg-amber-800 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" /></svg>
-            </button>
-          </form>
-        </div>
-      </div>
+      <form
+        onSubmit={(e) => sendMessage(e)}
+        className="p-4 bg-white border-t border-gray-100"
+      >
+        <input
+          className="w-full p-3 border rounded-full"
+          placeholder="Écrivez ici..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={isLoading}
+        />
+      </form>
     </div>
   );
 }
