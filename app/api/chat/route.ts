@@ -16,21 +16,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Génération de texte (Mode Bloquant pour Debug)
+    // 2. Génération de texte avec le NOM DE MODÈLE PRÉCIS (-001)
+    // C'est ce qui corrige l'erreur "Model not found"
     const { text } = await generateText({
-      model: google("gemini-1.5-flash"),
-      system: `Tu es Mindoguesito. Réponds brièvement.`,
+      model: google("gemini-1.5-flash-001"),
+      system: `Tu es Mindoguesito, le Sage de Ouidah. Réponds brièvement et chaleureusement.`,
       messages,
     });
 
     // 3. Réponse directe
     return new Response(text);
   } catch (error: unknown) {
-    // CORRECTION EXPERTE ICI : On remplace 'any' par 'unknown' et on sécurise la lecture du message
     console.error("ERREUR GOOGLE:", error);
-
     const errorMessage = error instanceof Error ? error.message : String(error);
-
     return new Response(`ERREUR TECHNIQUE : ${errorMessage}`, { status: 500 });
   }
 }
