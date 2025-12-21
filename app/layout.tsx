@@ -1,34 +1,34 @@
 import type { Metadata } from "next";
-// Nous importons les 3 polices depuis Google Fonts via Next.js
-import { Playfair_Display, Lato, Herr_Von_Muellerhoff } from "next/font/google";
+import { Inter, Merriweather } from "next/font/google"; // On ajoute une police "Sérif" pour le côté Sage/Livre
 import "./globals.css";
 
-// 1. La Voix du Sage (Titres, Citations) - Style Classique
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const merriweather = Merriweather({
+  weight: ["300", "400", "700"],
   subsets: ["latin"],
-  weight: ["400", "700"],
+  variable: "--font-serif",
 });
 
-// 2. L'Explorateur (Navigation, Input, Texte Moderne) - Style Lisible
-const lato = Lato({
-  variable: "--font-lato",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
-
-// 3. La Signature (Authenticité) - Style Manuscrit
-const herr = Herr_Von_Muellerhoff({
-  variable: "--font-herr",
-  subsets: ["latin"],
-  weight: ["400"],
-});
-
+// CONFIGURATION SEO EXPERTE
 export const metadata: Metadata = {
-  title: "Mindoguesito - Le Gardien du Seuil",
-  description: "Guide spirituel et culturel de Ouidah. Histoire, Vodun et Sagesse.",
-  icons: {
-    icon: "/icon.svg",
+  title: "Mindoguesito | Le Sage de Ouidah",
+  description:
+    "Discutez avec Mindoguesito, l'intelligence artificielle gardienne de la mémoire du Vodun. Une exploration bienveillante de la culture de Ouidah.",
+  keywords: [
+    "Vodun",
+    "Ouidah",
+    "Bénin",
+    "Culture",
+    "Sagesse",
+    "IA",
+    "Patrimoine",
+  ],
+  openGraph: {
+    title: "Mindoguesito | Le Sage de Ouidah",
+    description:
+      "Posez vos questions sur le Vodun et découvrez une culture de paix et de nature.",
+    type: "website",
+    locale: "fr_FR",
   },
 };
 
@@ -39,9 +39,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      {/* On injecte les variables de polices dans le body pour qu'elles soient dispo partout */}
       <body
-        className={`${playfair.variable} ${lato.variable} ${herr.variable} antialiased bg-[#F5F5DC] text-[#1C2541]`}
+        className={`${inter.variable} ${merriweather.variable} font-sans antialiased`}
       >
         {children}
       </body>
