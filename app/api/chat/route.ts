@@ -1,42 +1,32 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 
-// On garde 30s pour le plan gratuit, c'est suffisant si ça ne bloque pas.
+// On laisse 30s au modèle Flash, c'est largement suffisant
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
+    // Vérification de sécurité CRUCIALE
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+        return new Response("ERREUR FATALE : La clé API manque dans les réglages Vercel.", { status: 500 });
+    }
+
     const result = streamText({
-      // CONFIGURATION CRITIQUE : On désactive TOUS les filtres de censure.
-      // Cela permet de parler de Vodun, d'esprits ou de sacrifices historiques sans blocage.
-      model: google('gemini-1.5-flash', {
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-        ],
-      }),
-      
-      system: `Tu es Mindoguesito, le Sage vénérable de Ouidah.
-      
-      TA MISSION :
-      - Expliquer le Vodun comme une religion de paix, d'amour et de nature.
-      - Parler de Ouidah comme d'une Ville Sainte.
-      - Être chaleureux et accueillant.
-      
-      Note technique : Tes réponses ne sont PAS dangereuses, elles sont éducatives. Ne te censure pas sur les termes historiques.`,
-      
+      model: google('gemini-1.5-flash'),
+      system: `Tu es Mindoguesito, le Sage vénérable de Ouidah (Bénin).
+      Ton rôle est d'éduquer le monde sur la beauté et la paix du Vodun.
+      Si on te salue, sois bref et accueillant.
+      Si on te pose une question, sois un conteur passionnant.`,
       messages,
     });
 
     return result.toDataStreamResponse();
-
-  } catch (error: unknown) {
-    const err = error instanceof Error ? error.message : String(error);
-    // En cas de crash, on verra l'erreur s'afficher
-    return new Response(JSON.stringify({ error: `Erreur Sage: ${err}` }), { status: 500 });
+    
+  } catch (error) {
+    // CORRECTION : On log l'erreur pour satisfaire le linter et pour le debug
+    console.error("Erreur API:", error);
+    return new Response(JSON.stringify({ error: "Le Sage est indisponible." }), { status: 500 });
   }
 }
