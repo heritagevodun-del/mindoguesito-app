@@ -12,6 +12,7 @@ export default function Chat() {
     append,
     isLoading,
     error,
+    setMessages, // ✅ AJOUT : Pour pouvoir vider la conversation
   } = useChat();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -20,6 +21,13 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
+
+  // ✅ AJOUT : Fonction pour effacer l'historique
+  const handleClear = () => {
+    if (confirm("Voulez-vous effacer cette discussion et recommencer ?")) {
+      setMessages([]); // Remet la liste à zéro
+    }
+  };
 
   // Suggestions en mode "Cartes Élégantes"
   const suggestedQuestions = [
@@ -68,13 +76,33 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* 👇 NOUVEAU BADGE "GUIDE" ATTRAYANT */}
-          <div className="hidden sm:flex items-center gap-2 text-[11px] px-3 py-1.5 rounded-full bg-white/50 border border-ouidah-or/20 font-semibold text-ouidah-terre shadow-sm backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            Guide Spirituel Connecté
+          <div className="flex items-center gap-2">
+            {/* 👇 AJOUT : BOUTON POUBELLE (Visible seulement si messages > 0) */}
+            {messages.length > 0 && (
+              <button
+                onClick={handleClear}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 hover:bg-red-50 border border-ouidah-or/20 hover:border-red-200 text-ouidah-terre hover:text-red-600 font-semibold text-xs shadow-sm backdrop-blur-md transition-all group"
+                title="Nouvelle discussion"
+              >
+                <span className="group-hover:scale-110 transition-transform">
+                  🗑️
+                </span>
+                <span className="hidden sm:inline">Effacer</span>
+              </button>
+            )}
+
+            {/* BADGE "GUIDE" (Caché si on chatte sur mobile pour laisser place au bouton poubelle) */}
+            <div
+              className={`items-center gap-2 text-[11px] px-3 py-1.5 rounded-full bg-white/50 border border-ouidah-or/20 font-semibold text-ouidah-terre shadow-sm backdrop-blur-md ${
+                messages.length > 0 ? "hidden md:flex" : "hidden sm:flex"
+              }`}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              Guide Connecté
+            </div>
           </div>
         </div>
       </header>
@@ -168,7 +196,14 @@ export default function Chat() {
                       m.role === "assistant" ? "font-serif" : "font-sans"
                     }
                   >
-                    {m.content}
+                    {/* Rendu Markdown basique pour éviter les blocs bruts */}
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: m.content
+                          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                          .replace(/\n/g, "<br />"),
+                      }}
+                    ></div>
                   </span>
                 </div>
               </div>
