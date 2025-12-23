@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+// 👇 CORRECTION : On importe le plugin proprement au lieu d'utiliser 'require'
+import typography from "@tailwindcss/typography";
 
 export default {
   content: [
@@ -11,21 +13,38 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // VOTRE PALETTE "TERRE & ESPRIT"
         ouidah: {
-          terre: '#A0522D',   // Terre de Barre (Dominante)
-          indigo: '#1C2541',  // Esprit (Secondaire)
-          or: '#D4AF37',      // Lumière (Accent)
-          sable: '#F5F5DC',   // Support (Fond beige)
-          kaolin: '#FAF0E6',  // Variante plus claire pour les bulles
-        }
+          terre: "#A0522D",
+          indigo: "#1C2541",
+          or: "#D4AF37",
+          sable: "#Fdfbf7",
+          kaolin: "#FAF0E6",
+          gris: "#8D99AE",
+        },
       },
       fontFamily: {
-        sans: ['var(--font-lato)', 'sans-serif'],
-        serif: ['var(--font-playfair)', 'serif'],
-        hand: ['var(--font-herr)', 'cursive'], // La signature
+        sans: ["var(--font-inter)", "sans-serif"],
+        serif: ["var(--font-merriweather)", "serif"],
+      },
+      animation: {
+        "message-appear":
+          "message-appear 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
+        "fade-in": "fade-in 0.5s ease-out forwards",
+      },
+      keyframes: {
+        "message-appear": {
+          "0%": { opacity: "0", transform: "translateY(10px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // 👇 On utilise la variable importée ici
+    typography,
+  ],
 } satisfies Config;

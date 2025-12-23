@@ -1,34 +1,55 @@
-import type { Metadata } from "next";
-import { Inter, Merriweather } from "next/font/google"; // On ajoute une police "Sérif" pour le côté Sage/Livre
+import type { Metadata, Viewport } from "next";
+import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const merriweather = Merriweather({
-  weight: ["300", "400", "700"],
-  subsets: ["latin"],
-  variable: "--font-serif",
+// 1. POLICES OPTIMISÉES
+const inter = Inter({ 
+  subsets: ["latin"], 
+  variable: "--font-inter",
+  display: "swap" 
 });
 
-// CONFIGURATION SEO EXPERTE
+const merriweather = Merriweather({
+  weight: ["300", "400", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-merriweather", // Aligné avec tailwind.config.ts
+  display: "swap",
+});
+
+// 2. CONFIGURATION MOBILE
+export const viewport: Viewport = {
+  themeColor: "#fdfbf7",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
+// 3. SEO & IDENTITÉ
 export const metadata: Metadata = {
-  title: "Mindoguesito | Le Sage de Ouidah",
-  description:
-    "Discutez avec Mindoguesito, l'intelligence artificielle gardienne de la mémoire du Vodun. Une exploration bienveillante de la culture de Ouidah.",
-  keywords: [
-    "Vodun",
-    "Ouidah",
-    "Bénin",
-    "Culture",
-    "Sagesse",
-    "IA",
-    "Patrimoine",
-  ],
+  title: {
+    template: '%s | Mindoguesito',
+    default: 'Mindoguesito | Le Sage IA de Ouidah & Vodun',
+  },
+  description: "Intelligence artificielle gardienne de la mémoire du Vodun. Discutez avec le Sage, découvrez l'histoire de la Porte du Non-Retour et la culture du Bénin.",
+  applicationName: "Mindoguesito",
+  keywords: ["Vodun", "Ouidah", "Bénin", "IA", "Culture", "Histoire", "Tourisme", "Fâ"],
+  authors: [{ name: "Mindoguesito Team" }],
+  robots: "index, follow",
+  
+  // 👇 C'EST ICI : Votre icône est connectée
+  icons: {
+    icon: "/icon.svg", 
+    // apple: "/apple-icon.png", // Décommentez si vous ajoutez cette image plus tard
+  },
+  
   openGraph: {
-    title: "Mindoguesito | Le Sage de Ouidah",
-    description:
-      "Posez vos questions sur le Vodun et découvrez une culture de paix et de nature.",
     type: "website",
     locale: "fr_FR",
+    url: "https://mindoguesito.app",
+    siteName: "Mindoguesito",
+    title: "Mindoguesito - Le Sage IA de Ouidah",
+    description: "Une IA bienveillante pour explorer la culture Vodun et l'histoire du Bénin.",
   },
 };
 
@@ -38,9 +59,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`h-full ${inter.variable} ${merriweather.variable}`}>
       <body
-        className={`${inter.variable} ${merriweather.variable} font-sans antialiased`}
+        className="h-full bg-ouidah-sable text-ouidah-indigo font-sans antialiased overflow-hidden selection:bg-ouidah-terre selection:text-white"
       >
         {children}
       </body>
