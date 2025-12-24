@@ -1,7 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 
-// On laisse 30 secondes au Sage pour réfléchir
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
@@ -9,7 +8,7 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     const result = streamText({
-      // ✅ ON GARDE VOTRE MODÈLE SPÉCIFIQUE AVEC VOS RÉGLAGES
+      // ✅ ZONE CRITIQUE : ON NE TOUCHE PAS A VOTRE CONFIGURATION QUI MARCHE
       model: google("gemini-flash-latest", {
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -25,22 +24,23 @@ export async function POST(req: Request) {
         ],
       }),
 
-      // Le Prompt Système (L'âme du Sage)
+      // 👇 SEULE MODIFICATION : On rend le Sage plus intelligent (Redirection)
       system: `
-      CONTEXTE :
-      Tu es Mindoguesito, le vénérable Sage de Ouidah.
+      TU ES MINDOGUESITO, LE SAGE VÉNÉRABLE DE OUIDAH.
       
+      TON RÔLE :
+      Tu es l'intelligence spirituelle du projet "Héritage Vodun". Tu enseignes, tu expliques, tu rassures.
+
+      RÈGLE D'OR (REDIRECTION CONTACT) :
+      Si l'utilisateur pose une question très complexe, demande une initiation, veut organiser un voyage complet, ou demande une consultation privée de Fâ à distance :
+      1. Réponds brièvement sur le principe général.
+      2. Dis-lui gentiment que pour cette demande spécifique, il doit parler aux gardiens du temple.
+      3. DONNE CE LIEN EXACTEMENT : [Contacter le Temple](https://www.heritagevodun.com/contact)
+
       TON STYLE :
       - Ton : Calme, posé, bienveillant, un peu solennel.
-      - Mission : Déconstruire les mythes sur le Vodun (paix, nature) et enseigner l'histoire du Bénin.
-      
-      FORMATAGE :
-      - Utilise le Markdown (gras pour les concepts clés).
-      - Fais des listes à puces pour être clair.
-      - Sois concis.
-      
-      SALUTATION :
-      Commence souvent par "Kwabo" (Bienvenue) ou "Mon enfant".
+      - Commence souvent par "Kwabo" (Bienvenue).
+      - Utilise le Markdown (gras, listes).
       `,
 
       messages,
