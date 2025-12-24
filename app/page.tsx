@@ -1,7 +1,15 @@
 "use client";
 
-import { useChat } from "ai/react";
+import { useChat, Message } from "ai/react";
 import { useEffect, useRef, useState } from "react";
+
+// Structure d'une session archivée
+interface ArchivedChat {
+  id: string;
+  title: string;
+  date: string;
+  messages: Message[];
+}
 
 export default function Chat() {
   const {
@@ -18,18 +26,77 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // État pour stocker l'historique
+  const [archivedChats, setArchivedChats] = useState<ArchivedChat[]>([]);
+
+  // 1. Au chargement, on récupère la mémoire du navigateur
+  // L'astuce setTimeout calme le linter qui a peur des boucles infinies
+  useEffect(() => {
+    setTimeout(() => {
+      const savedHistory = localStorage.getItem("mindoguesito_history");
+      if (savedHistory) {
+        try {
+          setArchivedChats(JSON.parse(savedHistory));
+        } catch (e) {
+          console.error("Erreur lecture historique", e);
+        }
+      }
+    }, 0);
+  }, []);
+
   // Scroll automatique fluide
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  // Fonction pour démarrer un nouveau chat
+  // 2. Fonction pour SAUVEGARDER et créer un nouveau chat
   const handleNewChat = () => {
     if (messages.length > 0) {
-      if (confirm("Commencer une nouvelle conversation avec le Sage ?")) {
-        setMessages([]);
-        setIsSidebarOpen(false);
-      }
+      // On sauvegarde l'actuelle avant de nettoyer
+      const newArchive: ArchivedChat = {
+        id: Date.now().toString(), // ID unique basé sur l'heure
+        title: messages[0].content.substring(0, 30) + "...", // Titre = début du 1er message
+        date: new Date().toLocaleDateString(),
+        messages: messages, // On garde tous les messages
+      };
+
+      const updatedHistory = [newArchive, ...archivedChats]; // On ajoute en haut de la liste
+      setArchivedChats(updatedHistory);
+
+      // On écrit dans la mémoire du navigateur
+      localStorage.setItem(
+        "mindoguesito_history",
+        JSON.stringify(updatedHistory)
+      );
+
+      // On vide le plateau pour la nouvelle discussion
+      setMessages([]);
+      setIsSidebarOpen(false);
+    }
+  };
+
+  // 3. Fonction pour CHARGER une ancienne discussion
+  const loadChat = (chat: ArchivedChat) => {
+    if (
+      confirm(
+        "Charger cette ancienne discussion ? La discussion actuelle non sauvegardée sera perdue."
+      )
+    ) {
+      setMessages(chat.messages);
+      setIsSidebarOpen(false); // On ferme le menu sur mobile
+    }
+  };
+
+  // Fonction pour supprimer une archive spécifique
+  const deleteChat = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Empêche le clic de charger le chat
+    if (confirm("Oublier ce souvenir définitivement ?")) {
+      const updatedHistory = archivedChats.filter((c) => c.id !== id);
+      setArchivedChats(updatedHistory);
+      localStorage.setItem(
+        "mindoguesito_history",
+        JSON.stringify(updatedHistory)
+      );
     }
   };
 
@@ -43,7 +110,6 @@ export default function Chat() {
   return (
     <div className="flex h-[100dvh] bg-ouidah-sable font-sans overflow-hidden relative selection:bg-ouidah-terre selection:text-white">
       {/* --- 1. SIDEBAR (Navigation de Gauche) --- */}
-      {/* Overlay sombre pour mobile quand le menu est ouvert */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
@@ -87,17 +153,34 @@ export default function Chat() {
           </button>
         </div>
 
-        {/* Historique (Simulé pour l'instant) */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        {/* Historique RÉEL */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
           <p className="text-[10px] font-bold text-ouidah-gris uppercase tracking-widest mb-3 pl-2 opacity-60">
             Mémoire
           </p>
-          {messages.length > 0 ? (
-            <div className="text-sm text-white/90 px-3 py-2.5 rounded-lg bg-white/5 border border-white/5 truncate cursor-pointer hover:bg-white/10 transition-colors">
-              💬 {messages[0].content.substring(0, 20)}...
-            </div>
+
+          {archivedChats.length > 0 ? (
+            archivedChats.map((chat) => (
+              <div
+                key={chat.id}
+                onClick={() => loadChat(chat)}
+                className="group flex items-center justify-between text-sm text-white/80 px-3 py-3 rounded-lg bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 hover:text-white transition-all hover:border-ouidah-or/30"
+              >
+                <div className="truncate flex-1 pr-2">
+                  <span className="mr-2">💬</span> {chat.title}
+                </div>
+                {/* Bouton Supprimer discret */}
+                <button
+                  onClick={(e) => deleteChat(e, chat.id)}
+                  className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-red-400 p-1 transition-opacity"
+                  title="Supprimer"
+                >
+                  ×
+                </button>
+              </div>
+            ))
           ) : (
-            <div className="text-sm text-white/30 px-3 italic text-center py-4">
+            <div className="text-sm text-white/30 px-3 italic text-center py-4 border border-dashed border-white/10 rounded-lg">
               Aucune archive...
             </div>
           )}
