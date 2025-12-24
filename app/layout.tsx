@@ -17,9 +17,11 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "MINDOGUESITO IA | Le Sage de Ouidah",
   description: "Intelligence Artificielle dédiée à la spiritualité Vodun.",
-  // 👇 Le Favicon Temple Dynamique
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>",
+    // 👇 Le chemin "/" pointe directement vers le dossier 'public'
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 
