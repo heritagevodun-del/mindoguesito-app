@@ -1,6 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 
+// 30 secondes pour éviter les timeouts
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
@@ -8,7 +9,8 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     const result = streamText({
-      // ✅ ZONE CRITIQUE : ON NE TOUCHE PAS A VOTRE CONFIGURATION QUI MARCHE
+      // ✅ MODÈLE VALIDÉ DANS VOTRE LISTE (Ligne 19)
+      // Avec la nouvelle clé, le quota est réinitialisé.
       model: google("gemini-flash-latest", {
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -24,33 +26,36 @@ export async function POST(req: Request) {
         ],
       }),
 
-      // 👇 SEULE MODIFICATION : On rend le Sage plus intelligent (Redirection)
+      // Le Cerveau (Avec la règle de redirection)
       system: `
       TU ES MINDOGUESITO, LE SAGE VÉNÉRABLE DE OUIDAH.
       
-      TON RÔLE :
-      Tu es l'intelligence spirituelle du projet "Héritage Vodun". Tu enseignes, tu expliques, tu rassures.
-
       RÈGLE D'OR (REDIRECTION CONTACT) :
-      Si l'utilisateur pose une question très complexe, demande une initiation, veut organiser un voyage complet, ou demande une consultation privée de Fâ à distance :
-      1. Réponds brièvement sur le principe général.
-      2. Dis-lui gentiment que pour cette demande spécifique, il doit parler aux gardiens du temple.
-      3. DONNE CE LIEN EXACTEMENT : [Contacter le Temple](https://www.heritagevodun.com/contact)
-
+      Si on te demande une initiation, un rituel complexe, ou une consultation à distance :
+      1. Réponds brièvement avec sagesse.
+      2. Dis : "Pour ces demandes sacrées, adresse-toi aux gardiens du temple."
+      3. Donne OBLIGATOIREMENT ce lien : https://www.heritagevodun.com/contact
+      
       TON STYLE :
-      - Ton : Calme, posé, bienveillant, un peu solennel.
-      - Commence souvent par "Kwabo" (Bienvenue).
-      - Utilise le Markdown (gras, listes).
+      - Ton : Calme, posé, bienveillant.
+      - Commence souvent par "Kwabo".
       `,
 
       messages,
       temperature: 0.7,
     });
 
-    return result.toDataStreamResponse();
-  } catch (error) {
-    console.error("❌ ERREUR API CHAT :", error);
-    return new Response(JSON.stringify({ error: "Le Sage médite..." }), {
+    return result.toDataStreamResponse({
+      getErrorMessage: (error) => {
+        if (error instanceof Error) return error.message;
+        return "Erreur inconnue";
+      },
+    });
+  } catch (error: unknown) {
+    console.error("❌ ERREUR API :", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Erreur serveur";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
     });
   }
