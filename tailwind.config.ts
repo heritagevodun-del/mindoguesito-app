@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-// 👇 CORRECTION : On importe le plugin proprement au lieu d'utiliser 'require'
 import typography from "@tailwindcss/typography";
 
 export default {
@@ -14,26 +13,26 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         ouidah: {
-          terre: "#A0522D",
-          indigo: "#1C2541",
-          or: "#D4AF37",
-          sable: "#Fdfbf7",
-          kaolin: "#FAF0E6",
-          gris: "#8D99AE",
+          terre: "#A0522D", // Sienne (Terre rouge)
+          indigo: "#1C2541", // Nuit profonde
+          or: "#D4AF37", // Or Métallique
+          sable: "#Fdfbf7", // Fond Papier
+          kaolin: "#FAF0E6", // Blanc Cassé
+          gris: "#8D99AE", // Gris Pierre
         },
       },
       fontFamily: {
         sans: ["var(--font-inter)", "sans-serif"],
-        serif: ["var(--font-merriweather)", "serif"],
+        serif: ["var(--font-playfair)", "serif"], // La police Luxe
       },
       animation: {
         "message-appear":
-          "message-appear 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
-        "fade-in": "fade-in 0.5s ease-out forwards",
+          "message-appear 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
+        "fade-in": "fade-in 0.8s ease-out forwards",
       },
       keyframes: {
         "message-appear": {
-          "0%": { opacity: "0", transform: "translateY(10px) scale(0.98)" },
+          "0%": { opacity: "0", transform: "translateY(15px) scale(0.98)" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
         "fade-in": {
@@ -43,8 +42,5 @@ export default {
       },
     },
   },
-  plugins: [
-    // 👇 On utilise la variable importée ici
-    typography,
-  ],
+  plugins: [typography],
 } satisfies Config;

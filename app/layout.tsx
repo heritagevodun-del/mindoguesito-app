@@ -1,55 +1,25 @@
-import type { Metadata, Viewport } from "next";
-import { Inter, Merriweather } from "next/font/google";
+import type { Metadata } from "next";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-// 1. POLICES OPTIMISÉES
-const inter = Inter({ 
-  subsets: ["latin"], 
-  variable: "--font-inter",
-  display: "swap" 
-});
-
-const merriweather = Merriweather({
-  weight: ["300", "400", "700", "900"],
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-merriweather", // Aligné avec tailwind.config.ts
+  variable: "--font-inter",
   display: "swap",
 });
 
-// 2. CONFIGURATION MOBILE
-export const viewport: Viewport = {
-  themeColor: "#fdfbf7",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
-// 3. SEO & IDENTITÉ
 export const metadata: Metadata = {
-  title: {
-    template: '%s | Mindoguesito',
-    default: 'Mindoguesito | Le Sage IA de Ouidah & Vodun',
-  },
-  description: "Intelligence artificielle gardienne de la mémoire du Vodun. Discutez avec le Sage, découvrez l'histoire de la Porte du Non-Retour et la culture du Bénin.",
-  applicationName: "Mindoguesito",
-  keywords: ["Vodun", "Ouidah", "Bénin", "IA", "Culture", "Histoire", "Tourisme", "Fâ"],
-  authors: [{ name: "Mindoguesito Team" }],
-  robots: "index, follow",
-  
-  // 👇 C'EST ICI : Votre icône est connectée
+  title: "MINDOGUESITO IA | Le Sage de Ouidah",
+  description: "Intelligence Artificielle dédiée à la spiritualité Vodun.",
+  // 👇 Le Favicon Temple Dynamique
   icons: {
-    icon: "/icon.svg", 
-    // apple: "/apple-icon.png", // Décommentez si vous ajoutez cette image plus tard
-  },
-  
-  openGraph: {
-    type: "website",
-    locale: "fr_FR",
-    url: "https://mindoguesito.app",
-    siteName: "Mindoguesito",
-    title: "Mindoguesito - Le Sage IA de Ouidah",
-    description: "Une IA bienveillante pour explorer la culture Vodun et l'histoire du Bénin.",
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>",
   },
 };
 
@@ -59,10 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`h-full ${inter.variable} ${merriweather.variable}`}>
-      <body
-        className="h-full bg-ouidah-sable text-ouidah-indigo font-sans antialiased overflow-hidden selection:bg-ouidah-terre selection:text-white"
-      >
+    <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
+      <body className="antialiased bg-ouidah-sable text-ouidah-indigo">
         {children}
       </body>
     </html>
