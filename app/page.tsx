@@ -30,7 +30,6 @@ export default function Chat() {
   const [archivedChats, setArchivedChats] = useState<ArchivedChat[]>([]);
 
   // 1. Au chargement, on récupère la mémoire du navigateur
-  // L'astuce setTimeout calme le linter qui a peur des boucles infinies
   useEffect(() => {
     setTimeout(() => {
       const savedHistory = localStorage.getItem("mindoguesito_history");
@@ -52,24 +51,20 @@ export default function Chat() {
   // 2. Fonction pour SAUVEGARDER et créer un nouveau chat
   const handleNewChat = () => {
     if (messages.length > 0) {
-      // On sauvegarde l'actuelle avant de nettoyer
       const newArchive: ArchivedChat = {
-        id: Date.now().toString(), // ID unique basé sur l'heure
-        title: messages[0].content.substring(0, 30) + "...", // Titre = début du 1er message
+        id: Date.now().toString(),
+        title: messages[0].content.substring(0, 30) + "...",
         date: new Date().toLocaleDateString(),
-        messages: messages, // On garde tous les messages
+        messages: messages,
       };
 
-      const updatedHistory = [newArchive, ...archivedChats]; // On ajoute en haut de la liste
+      const updatedHistory = [newArchive, ...archivedChats];
       setArchivedChats(updatedHistory);
-
-      // On écrit dans la mémoire du navigateur
       localStorage.setItem(
         "mindoguesito_history",
         JSON.stringify(updatedHistory)
       );
 
-      // On vide le plateau pour la nouvelle discussion
       setMessages([]);
       setIsSidebarOpen(false);
     }
@@ -83,13 +78,13 @@ export default function Chat() {
       )
     ) {
       setMessages(chat.messages);
-      setIsSidebarOpen(false); // On ferme le menu sur mobile
+      setIsSidebarOpen(false);
     }
   };
 
-  // Fonction pour supprimer une archive spécifique
+  // Fonction pour supprimer une archive
   const deleteChat = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Empêche le clic de charger le chat
+    e.stopPropagation();
     if (confirm("Oublier ce souvenir définitivement ?")) {
       const updatedHistory = archivedChats.filter((c) => c.id !== id);
       setArchivedChats(updatedHistory);
@@ -97,6 +92,27 @@ export default function Chat() {
         "mindoguesito_history",
         JSON.stringify(updatedHistory)
       );
+    }
+  };
+
+  // 👇 FONCTION CORRIGÉE (Plus d'erreur 'err unused')
+  const handleShare = async () => {
+    const shareData = {
+      title: "MINDOGUESITO",
+      text: "Discute avec le Sage numérique de Ouidah. Une expérience unique sur le Vodun.",
+      url: "https://mindoguesito.com",
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // On utilise la variable 'err' pour calmer le linter
+        console.log("Partage annulé ou erreur:", err);
+      }
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      alert("✨ Lien du Temple copié ! Partagez-le avec vos proches.");
     }
   };
 
@@ -169,7 +185,6 @@ export default function Chat() {
                 <div className="truncate flex-1 pr-2">
                   <span className="mr-2">💬</span> {chat.title}
                 </div>
-                {/* Bouton Supprimer discret */}
                 <button
                   onClick={(e) => deleteChat(e, chat.id)}
                   className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-red-400 p-1 transition-opacity"
@@ -188,6 +203,17 @@ export default function Chat() {
 
         {/* Pied de page Sidebar */}
         <div className="p-4 border-t border-white/10 space-y-1 bg-black/20">
+          {/* Bouton Partager */}
+          <button
+            onClick={handleShare}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 text-sm text-ouidah-or font-medium hover:text-white transition-colors group text-left mb-2 border border-ouidah-or/20 hover:border-ouidah-or/50"
+          >
+            <span className="group-hover:scale-110 transition-transform">
+              ✨
+            </span>{" "}
+            Partager le Temple
+          </button>
+
           <a
             href="https://www.heritagevodun.com"
             target="_blank"
