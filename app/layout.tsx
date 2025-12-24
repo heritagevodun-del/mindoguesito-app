@@ -14,11 +14,49 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+// 👇 CONFIGURATION SEO COMPLETE (OPEN GRAPH)
 export const metadata: Metadata = {
-  title: "MINDOGUESITO IA | Le Sage de Ouidah",
-  description: "Intelligence Artificielle dédiée à la spiritualité Vodun.",
+  // Remplacez par votre VRAI domaine final (ex: https://www.mindoguesito.com)
+  // C'est important pour que les images s'affichent sur Facebook/Twitter
+  metadataBase: new URL("https://mindoguesito.com"),
+
+  title: {
+    default: "MINDOGUESITO | L'Intelligence Artificielle Vodun",
+    template: "%s | MINDOGUESITO",
+  },
+  description:
+    "Découvrez la sagesse ancestrale de Ouidah à travers une IA unique. Posez vos questions sur l'histoire, les rites et la culture Vodun.",
+
+  // Configuration pour le partage social (Facebook, LinkedIn, WhatsApp)
+  openGraph: {
+    title: "MINDOGUESITO | Le Sage Numérique de Ouidah",
+    description:
+      "Une conversation unique avec l'esprit du Vodun. Cliquez pour entrer dans le temple numérique.",
+    url: "https://mindoguesito.com",
+    siteName: "Mindoguesito AI",
+    locale: "fr_FR",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.jpg", // L'image que vous devez mettre dans le dossier public
+        width: 1200,
+        height: 630,
+        alt: "Interface de Mindoguesito IA",
+      },
+    ],
+  },
+
+  // Configuration pour Twitter / X
+  twitter: {
+    card: "summary_large_image",
+    title: "MINDOGUESITO | IA & Culture Vodun",
+    description:
+      "La rencontre entre la technologie et la tradition. Essayez le Sage maintenant.",
+    images: ["/og-image.png"], // La même image
+  },
+
+  // Configuration des icônes (Favicon)
   icons: {
-    // 👇 Le chemin "/" pointe directement vers le dossier 'public'
     icon: "/icon.svg",
     shortcut: "/icon.svg",
     apple: "/icon.svg",
